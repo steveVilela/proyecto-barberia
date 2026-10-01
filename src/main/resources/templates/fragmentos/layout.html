@@ -76,28 +76,66 @@
                     <span class="fs-5 fw-bold text-white">BarberApp</span>
                 </div>
 
-                <!-- Menú de Navegación -->
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/admin/dashboard}">
-                            <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/barberos}">
-                            <i class="bi bi-people me-2"></i> Barberos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/servicios}">
-                            <i class="bi bi-scissors me-2"></i> Servicios
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/citas}">
-                            <i class="bi bi-calendar-check me-2"></i> Gestión Citas
-                        </a>
-                    </li>
+                <!-- Menú de Navegación por Roles -->
+                <ul class="nav flex-column" th:if="${session.usuarioLogueado != null}">
+                    
+                    <!-- 1. Menú ADMIN -->
+                    <th:block th:if="${session.usuarioLogueado.rol == 'ADMIN'}">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/dashboard}">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/barberos}">
+                                <i class="bi bi-people me-2"></i> Barberos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/servicios}">
+                                <i class="bi bi-scissors me-2"></i> Servicios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/citas}">
+                                <i class="bi bi-calendar-check me-2"></i> Gestión Citas
+                            </a>
+                        </li>
+						<li class="nav-item">
+						    <a class="nav-link" th:href="@{/admin/usuarios}">
+						        <i class="bi bi-person-lines-fill me-2"></i> Usuarios
+						    </a>
+						</li>
+                    </th:block>
+
+                    <!-- 2. Menú BARBERO -->
+                    <th:block th:if="${session.usuarioLogueado.rol == 'BARBERO'}">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/barbero/citas}">
+                                <i class="bi bi-calendar-day me-2"></i> Mi Agenda
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/servicios}">
+                                <i class="bi bi-scissors me-2"></i> Catálogo Servicios
+                            </a>
+                        </li>
+                    </th:block>
+
+                    <!-- 3. Menú CLIENTE -->
+                    <th:block th:if="${session.usuarioLogueado.rol == 'CLIENTE'}">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/cliente/mis-citas}">
+                                <i class="bi bi-scissors me-2"></i> Servicios Disponibles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/citas}">
+                                <i class="bi bi-clock-history me-2"></i> Mis Reservas
+                            </a>
+                        </li>
+                    </th:block>
+
                 </ul>
             </div>
 

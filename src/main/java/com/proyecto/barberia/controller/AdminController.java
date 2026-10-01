@@ -4,6 +4,7 @@ import com.proyecto.barberia.model.Usuario;
 import com.proyecto.barberia.service.IBarberoService;
 import com.proyecto.barberia.service.ICitaService;
 import com.proyecto.barberia.service.IServicioService;
+import com.proyecto.barberia.service.IUsuarioService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,9 @@ public class AdminController {
     @Autowired
     private ICitaService citaService;
 
+    @Autowired
+    private IUsuarioService usuarioService;
+
     private boolean validarAdmin(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
         return usuario != null && "ADMIN".equalsIgnoreCase(usuario.getRol());
@@ -47,5 +51,15 @@ public class AdminController {
         model.addAttribute("ultimasCitas", citaService.listarUltimasCinco());
 
         return "admin/dashboard";
+    }
+
+    @GetMapping("/usuarios")
+    public String listarUsuarios(HttpSession session, Model model) {
+        if (!validarAdmin(session)) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("usuarios", usuarioService.listarTodos());
+        return "usuarios/listar";
     }
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Gestión de Usuarios', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Gestión de Usuarios</h2>
+            <span class="text-secondary small">Lista de cuentas y roles registrados</span>
+        </div>
+    </div>
+
+    <!-- Mensajes Flash -->
+    <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show bg-success text-white border-0" role="alert">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${mensaje}"></span>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <div class="table-dark-custom p-3">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${usuarios}">
+                        <td class="text-secondary" th:text="${u.idUsuario}">1</td>
+                        <td class="fw-bold text-white" th:text="${u.nombre}">Usuario</td>
+                        <td th:text="${u.correo}">correo@dominio.com</td>
+                        <td th:text="${u.telefono != null && !u.telefono.isEmpty() ? u.telefono : '-'}">-</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'BARBERO' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
+                                  th:text="${u.rol}">ROL</span>
+                        </td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${u.estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary'}"
+                                  th:text="${u.estado}">ACTIVO</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(usuarios)}">
+                        <td colspan="6" class="text-center text-secondary py-4">
+                            No se encontraron usuarios registrados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
