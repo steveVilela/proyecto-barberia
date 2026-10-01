@@ -61,100 +61,125 @@
             color: #8b949e; 
             font-weight: 600; 
         }
+        .navbar-mobile {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+        .offcanvas-dark {
+            background-color: #161b22;
+            color: #e1e7ef;
+        }
     </style>
 </head>
 <body>
 
+<!-- Barra superior visible SOLO en móviles -->
+<header class="navbar navbar-mobile d-md-none p-3">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-scissors fs-4 text-gold me-2"></i>
+        <span class="fs-5 fw-bold text-white">BarberApp</span>
+    </div>
+    <button class="btn btn-outline-secondary border-0 text-gold" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+        <i class="bi bi-list fs-2"></i>
+    </button>
+</header>
+
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar Reutilizable -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar p-3 collapse d-md-flex flex-column justify-content-between">
-            <div>
-                <!-- Brand / Logo -->
-                <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary">
-                    <i class="bi bi-scissors fs-3 text-gold me-2"></i>
-                    <span class="fs-5 fw-bold text-white">BarberApp</span>
+        <!-- Sidebar: Deslizable en móvil (offcanvas-md) y columna fija en escritorio (d-md-block) -->
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 offcanvas-md offcanvas-start sidebar p-3 offcanvas-dark" tabindex="-1" aria-labelledby="sidebarMenuLabel">
+            <div class="d-flex flex-column justify-content-between h-100">
+                <div>
+                    <!-- Encabezado Sidebar -->
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-secondary">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-scissors fs-3 text-gold me-2"></i>
+                            <span class="fs-5 fw-bold text-white">BarberApp</span>
+                        </div>
+                        <!-- Botón cerrar solo visible en móvil -->
+                        <button type="button" class="btn-close btn-close-white d-md-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Menú de Navegación por Roles -->
+                    <ul class="nav flex-column" th:if="${session.usuarioLogueado != null}">
+                        
+                        <!-- 1. Menú ADMIN -->
+                        <th:block th:if="${session.usuarioLogueado.rol == 'ADMIN'}">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/dashboard}">
+                                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/barberos}">
+                                    <i class="bi bi-people me-2"></i> Barberos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/servicios}">
+                                    <i class="bi bi-scissors me-2"></i> Servicios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/citas}">
+                                    <i class="bi bi-calendar-check me-2"></i> Gestión Citas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/usuarios}">
+                                    <i class="bi bi-person-lines-fill me-2"></i> Usuarios
+                                </a>
+                            </li>
+                        </th:block>
+
+                        <!-- 2. Menú BARBERO -->
+                        <th:block th:if="${session.usuarioLogueado.rol == 'BARBERO'}">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/barbero/citas}">
+                                    <i class="bi bi-calendar-day me-2"></i> Mi Agenda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/servicios}">
+                                    <i class="bi bi-scissors me-2"></i> Catálogo Servicios
+                                </a>
+                            </li>
+                        </th:block>
+
+                        <!-- 3. Menú CLIENTE -->
+                        <th:block th:if="${session.usuarioLogueado.rol == 'CLIENTE'}">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/cliente/mis-citas}">
+                                    <i class="bi bi-scissors me-2"></i> Servicios Disponibles
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/citas}">
+                                    <i class="bi bi-clock-history me-2"></i> Mis Reservas
+                                </a>
+                            </li>
+                        </th:block>
+
+                    </ul>
                 </div>
 
-                <!-- Menú de Navegación por Roles -->
-                <ul class="nav flex-column" th:if="${session.usuarioLogueado != null}">
-                    
-                    <!-- 1. Menú ADMIN -->
-                    <th:block th:if="${session.usuarioLogueado.rol == 'ADMIN'}">
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin/dashboard}">
-                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/barberos}">
-                                <i class="bi bi-people me-2"></i> Barberos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/servicios}">
-                                <i class="bi bi-scissors me-2"></i> Servicios
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/citas}">
-                                <i class="bi bi-calendar-check me-2"></i> Gestión Citas
-                            </a>
-                        </li>
-						<li class="nav-item">
-						    <a class="nav-link" th:href="@{/admin/usuarios}">
-						        <i class="bi bi-person-lines-fill me-2"></i> Usuarios
-						    </a>
-						</li>
-                    </th:block>
-
-                    <!-- 2. Menú BARBERO -->
-                    <th:block th:if="${session.usuarioLogueado.rol == 'BARBERO'}">
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/barbero/citas}">
-                                <i class="bi bi-calendar-day me-2"></i> Mi Agenda
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/servicios}">
-                                <i class="bi bi-scissors me-2"></i> Catálogo Servicios
-                            </a>
-                        </li>
-                    </th:block>
-
-                    <!-- 3. Menú CLIENTE -->
-                    <th:block th:if="${session.usuarioLogueado.rol == 'CLIENTE'}">
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/cliente/mis-citas}">
-                                <i class="bi bi-scissors me-2"></i> Servicios Disponibles
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/citas}">
-                                <i class="bi bi-clock-history me-2"></i> Mis Reservas
-                            </a>
-                        </li>
-                    </th:block>
-
-                </ul>
-            </div>
-
-            <!-- Perfil del Usuario en Sesión y Botón Salir -->
-            <div class="border-top border-secondary pt-3 mt-4">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="me-2">
-                        <i class="bi bi-person-circle fs-3 text-gold"></i>
+                <!-- Perfil del Usuario y Salir -->
+                <div class="border-top border-secondary pt-3 mt-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2">
+                            <i class="bi bi-person-circle fs-3 text-gold"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <small class="d-block fw-bold text-truncate" 
+                                   th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.nombre : 'Usuario'}">Usuario</small>
+                            <span class="badge bg-gold small" 
+                                  th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.rol : 'ROL'}">ROL</span>
+                        </div>
                     </div>
-                    <div class="overflow-hidden">
-                        <small class="d-block fw-bold text-truncate" 
-                               th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.nombre : 'Usuario'}">Usuario</small>
-                        <span class="badge bg-gold small" 
-                              th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.rol : 'ROL'}">ROL</span>
-                    </div>
+                    <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger w-100 mt-2">
+                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
+                    </a>
                 </div>
-                <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger w-100 mt-2">
-                    <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
-                </a>
             </div>
         </nav>
 
