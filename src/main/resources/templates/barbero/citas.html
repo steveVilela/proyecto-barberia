@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Mis Citas de Hoy', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Agenda de Citas</h2>
+            <span class="text-secondary small" th:text="'Bienvenido, ' + ${usuario.nombre}">Barbero</span>
+        </div>
+        <span class="badge bg-dark border border-secondary p-2 text-gold" 
+              th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}"></span>
+    </div>
+
+    <!-- Tabla de Citas del Día -->
+    <div class="table-dark-custom p-3">
+        <h5 class="fw-bold text-white mb-3"><i class="bi bi-calendar-check me-2"></i>Citas Programadas para Hoy</h5>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Cliente</th>
+                        <th>Servicio</th>
+                        <th>Observación</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cita : ${citasHoy}">
+                        <td class="fw-bold text-gold" th:text="${cita.hora}">10:00</td>
+                        <td th:text="${cita.usuario != null ? cita.usuario.nombre : 'Sin especificar'}">Cliente</td>
+                        <td th:text="${cita.servicio != null ? cita.servicio.nombre : 'Corte'}">Servicio</td>
+                        <td th:text="${cita.observacion != null ? cita.observacion : '-'}">-</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${cita.estado == 'CONFIRMADA' ? 'bg-success' : (cita.estado == 'PENDIENTE' ? 'bg-warning text-dark' : 'bg-danger')}"
+                                  th:text="${cita.estado}">PENDIENTE</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(citasHoy)}">
+                        <td colspan="5" class="text-center text-secondary py-4">
+                            No tienes citas programadas para el día de hoy.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

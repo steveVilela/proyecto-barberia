@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Dashboard General', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Panel General de Control</h2>
+            <span class="text-secondary small">Resumen en tiempo real del negocio</span>
+        </div>
+        <span class="badge bg-dark border border-secondary p-2 text-secondary" 
+              th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}"></span>
+    </div>
+
+    <!-- Tarjetas de Métricas -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-4">
+            <div class="card card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small d-block">Barberos Activos</span>
+                        <h3 class="fw-bold mb-0 text-white" th:text="${totalBarberos}">0</h3>
+                    </div>
+                    <div class="bg-dark p-3 rounded text-gold"><i class="bi bi-people fs-3"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small d-block">Servicios Ofrecidos</span>
+                        <h3 class="fw-bold mb-0 text-white" th:text="${totalServicios}">0</h3>
+                    </div>
+                    <div class="bg-dark p-3 rounded text-gold"><i class="bi bi-card-checklist fs-3"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-4">
+            <div class="card card-custom p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary small d-block">Citas para Hoy</span>
+                        <h3 class="fw-bold mb-0 text-white" th:text="${citasHoy}">0</h3>
+                    </div>
+                    <div class="bg-dark p-3 rounded text-gold"><i class="bi bi-calendar-event fs-3"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Citas Recientes -->
+    <div class="table-dark-custom p-3">
+        <h5 class="fw-bold text-white mb-3">Últimas Citas Registradas</h5>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th># ID</th>
+                        <th>Cliente</th>
+                        <th>Barbero</th>
+                        <th>Servicio</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cita : ${ultimasCitas}">
+                        <td th:text="${cita.idCita}">1</td>
+                        <td th:text="${cita.usuario != null ? cita.usuario.nombre : 'Anónimo'}">Juan Pérez</td>
+                        <td th:text="${cita.barbero != null ? cita.barbero.nombre : 'No asignado'}">Carlos</td>
+                        <td th:text="${cita.servicio != null ? cita.servicio.nombre : 'Corte'}">Degradado</td>
+                        <td th:text="${cita.fecha}">2026-09-29</td>
+                        <td th:text="${cita.hora}">15:00</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${cita.estado == 'CONFIRMADA' ? 'bg-success' : (cita.estado == 'PENDIENTE' ? 'bg-warning text-dark' : 'bg-danger')}"
+                                  th:text="${cita.estado}">PENDIENTE</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ultimasCitas)}">
+                        <td colspan="7" class="text-center text-secondary py-3">No hay citas registradas en el sistema.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

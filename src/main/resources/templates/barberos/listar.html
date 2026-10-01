@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Gestión de Barberos', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado con Botón Nuevo -->
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Equipo de Barberos</h2>
+            <span class="text-secondary small">Listado de especialistas activos e inactivos</span>
+        </div>
+        <a th:href="@{/barberos/nuevo}" class="btn btn-gold">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Barbero
+        </a>
+    </div>
+
+    <!-- Alertas de éxito o error -->
+    <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
+        <span th:text="${mensaje}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tabla de Barberos -->
+    <div class="table-dark-custom p-3">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Foto</th>
+                        <th>Nombre</th>
+                        <th>Especialidad</th>
+                        <th>Estado</th>
+                        <th class="text-end" style="width: 150px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="barbero : ${barberos}">
+                        <td>
+                            <img th:if="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty()}" 
+                                 th:src="${barbero.fotoUrl}" 
+                                 class="rounded-circle object-fit-cover border border-secondary" 
+                                 style="width: 45px; height: 45px;" alt="Foto">
+                            <div th:unless="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty()}" 
+                                 class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center text-secondary border border-secondary" 
+                                 style="width: 45px; height: 45px;">
+                                <i class="bi bi-person-fill fs-5"></i>
+                            </div>
+                        </td>
+                        <td class="fw-bold text-white" th:text="${barbero.nombre}">Nombre Apellido</td>
+                        <td class="text-secondary" th:text="${barbero.especialidad != null ? barbero.especialidad : 'General'}">Degradados / Barba</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${barbero.estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary'}"
+                                  th:text="${barbero.estado}">ACTIVO</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{/barberos/editar/{id}(id=${barbero.idBarbero})}" 
+                               class="btn btn-sm btn-outline-warning me-1" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a th:href="@{/barberos/eliminar/{id}(id=${barbero.idBarbero})}" 
+                               onclick="return confirm('¿Seguro que deseas eliminar a este barbero? Se borrará también su foto del storage.')" 
+                               class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(barberos)}">
+                        <td colspan="5" class="text-center text-secondary py-4">
+                            No hay barberos registrados en el sistema. Presiona "Nuevo Barbero" para agregar uno.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
