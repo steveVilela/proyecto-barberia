@@ -32,8 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 /target/
-gcp-credentials.json
-src/main/resources/gcp-credentials.json
+
 .settings/
 .classpath
 .project
