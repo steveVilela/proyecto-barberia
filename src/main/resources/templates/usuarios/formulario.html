@@ -58,35 +58,19 @@
                                 <option value="ADMIN">ADMIN</option>
                             </select>
                         </div>
-
-                        <!-- Estado -->
-                        <div class="col-md-6">
-                            <label class="form-label text-secondary small">Estado</label>
-                            <select th:field="*{estado}" class="form-select bg-dark text-white border-secondary">
-                                <option value="ACTIVO">ACTIVO</option>
-                                <option value="INACTIVO">INACTIVO</option>
-                            </select>
+                        <!-- Foto con opción de Tomar Foto o Galería -->
+                        <div class="col-12">
+                            <label class="form-label text-secondary small">Foto de Perfil (Opcional)</label>
+                            <input type="file" 
+                                   name="archivoFoto" 
+                                   id="archivoFoto" 
+                                   class="form-control bg-dark text-white border-secondary" 
+                                   accept="image/*">
+                            <div class="form-text text-secondary small">
+                                En celulares permite elegir entre tomar foto con la cámara o seleccionar desde la galería.
+                            </div>
                         </div>
 
-                        <!-- Foto opcional -->
-						<!-- Foto con opción de Tomar Foto o Galería -->
-						<div class="col-12">
-						    <label class="form-label text-secondary small">Foto de Perfil (Opcional)</label>
-						    <div class="input-group">
-						        <input type="file" 
-						               name="archivoFoto" 
-						               id="archivoFoto" 
-						               class="form-control bg-dark text-white border-secondary" 
-						               accept="image/*" 
-						               capture="user">
-						        <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('archivoFoto').click()">
-						            <i class="bi bi-camera-fill me-1"></i> Cámara
-						        </button>
-						    </div>
-						    <div class="form-text text-secondary">
-						        En celulares, abrirá directamente la cámara frontal/trasera para capturar la foto.
-						    </div>
-						</div>
 
                         <!-- Botones de Acción -->
                         <div class="col-12 mt-4 d-flex justify-content-end gap-2 border-top border-secondary pt-3">
