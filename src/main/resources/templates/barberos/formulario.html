@@ -46,26 +46,20 @@
                         <!-- Subida de Foto a GCP (Cámara o Galería) -->
                         <div class="col-md-6">
                             <label class="form-label text-secondary small">Foto de Perfil (JPG, PNG)</label>
-                            <div class="input-group">
-                                <input type="file" 
-                                       name="archivoFoto" 
-                                       id="inputFoto" 
-                                       class="form-control bg-dark text-white border-secondary" 
-                                       accept="image/*" 
-                                       capture="user">
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('inputFoto').click()">
-                                    <i class="bi bi-camera-fill me-1"></i> Cámara
-                                </button>
-                            </div>
+                            <input type="file" 
+                                   name="archivoFoto" 
+                                   id="inputFoto" 
+                                   class="form-control bg-dark text-white border-secondary" 
+                                   accept="image/*">
                             <div class="form-text text-secondary small">
-                                En PC abre el explorador; en celular permite capturar con cámara o elegir archivo.
+                                En celulares permite elegir entre capturar foto o buscar en la galería.
                             </div>
                         </div>
 
                         <!-- Previsualización de la Foto -->
                         <div class="col-12 text-center py-2" th:if="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty()}">
                             <span class="text-secondary small d-block mb-2">Foto actual registrada en Cloud Storage:</span>
-                            <img th:src="${barbero.fotoUrl}" class="rounded-circle border border-warning object-fit-cover" style="width: 90px; height: 90px;" alt="Foto Barbero">
+                            <img th:src="${barbero.fotoUrl}" class="rounded-circle border border-warning object-fit-cover shadow" style="width: 90px; height: 90px;" alt="Foto Barbero">
                         </div>
 
                         <!-- Botones de Acción -->
