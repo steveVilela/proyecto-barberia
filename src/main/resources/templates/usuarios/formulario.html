@@ -58,6 +58,16 @@
                                 <option value="ADMIN">ADMIN</option>
                             </select>
                         </div>
+
+                        <!-- Estado -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Estado</label>
+                            <select th:field="*{estado}" class="form-select bg-dark text-white border-secondary">
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="INACTIVO">INACTIVO</option>
+                            </select>
+                        </div>
+
                         <!-- Foto con opción de Tomar Foto o Galería -->
                         <div class="col-12">
                             <label class="form-label text-secondary small">Foto de Perfil (Opcional)</label>
@@ -67,10 +77,15 @@
                                    class="form-control bg-dark text-white border-secondary" 
                                    accept="image/*">
                             <div class="form-text text-secondary small">
-                                En celulares permite elegir entre tomar foto con la cámara o seleccionar desde la galería.
+                                En celulares permite elegir entre capturar foto al instante o seleccionar desde la galería.
                             </div>
                         </div>
 
+                        <!-- Previsualización si ya existe foto -->
+                        <div class="col-12 text-center py-2" th:if="${usuarioForm.fotoUrl != null and !usuarioForm.fotoUrl.isEmpty()}">
+                            <span class="text-secondary small d-block mb-2">Foto actual registrada:</span>
+                            <img th:src="${usuarioForm.fotoUrl}" class="rounded-circle border border-warning object-fit-cover shadow" style="width: 80px; height: 80px;" alt="Foto Usuario">
+                        </div>
 
                         <!-- Botones de Acción -->
                         <div class="col-12 mt-4 d-flex justify-content-end gap-2 border-top border-secondary pt-3">
