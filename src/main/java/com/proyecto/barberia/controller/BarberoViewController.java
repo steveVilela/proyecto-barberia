@@ -67,7 +67,8 @@ public class BarberoViewController {
         try {
             barberoService.guardar(barbero, archivoFoto);
             flash.addFlashAttribute("mensaje", "Barbero guardado con éxito.");
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             flash.addFlashAttribute("error", "Error al procesar la imagen en Cloud Storage: " + e.getMessage());
         }
         return "redirect:/barberos";
