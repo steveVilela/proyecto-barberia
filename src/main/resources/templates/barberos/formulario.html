@@ -43,10 +43,23 @@
                             </select>
                         </div>
 
-                        <!-- Subida de Foto a GCP -->
+                        <!-- Subida de Foto a GCP (Cámara o Galería) -->
                         <div class="col-md-6">
                             <label class="form-label text-secondary small">Foto de Perfil (JPG, PNG)</label>
-                            <input type="file" name="archivoFoto" id="inputFoto" class="form-control bg-dark text-white border-secondary" accept="image/*">
+                            <div class="input-group">
+                                <input type="file" 
+                                       name="archivoFoto" 
+                                       id="inputFoto" 
+                                       class="form-control bg-dark text-white border-secondary" 
+                                       accept="image/*" 
+                                       capture="user">
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('inputFoto').click()">
+                                    <i class="bi bi-camera-fill me-1"></i> Cámara
+                                </button>
+                            </div>
+                            <div class="form-text text-secondary small">
+                                En PC abre el explorador; en celular permite capturar con cámara o elegir archivo.
+                            </div>
                         </div>
 
                         <!-- Previsualización de la Foto -->
