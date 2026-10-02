@@ -31,7 +31,7 @@
             <table class="table table-dark table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th style="width: 70px;">Foto</th>
                         <th>Nombre</th>
                         <th>Correo</th>
                         <th>Teléfono</th>
@@ -42,7 +42,21 @@
                 </thead>
                 <tbody>
                     <tr th:each="u : ${usuarios}">
-                        <td class="text-secondary" th:text="${u.idUsuario}">1</td>
+                        <!-- Foto o Avatar por defecto -->
+                        <td>
+                            <div th:if="${u.fotoUrl != null && !#strings.isEmpty(u.fotoUrl)}">
+                                <img th:src="${u.fotoUrl}" 
+                                     alt="Foto" 
+                                     class="rounded-circle border border-secondary shadow-sm" 
+                                     style="width: 44px; height: 44px; object-fit: cover;">
+                            </div>
+                            <div th:unless="${u.fotoUrl != null && !#strings.isEmpty(u.fotoUrl)}" 
+                                 class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center text-muted" 
+                                 style="width: 44px; height: 44px;">
+                                <i class="bi bi-person-fill fs-5"></i>
+                            </div>
+                        </td>
+
                         <td class="fw-bold text-white" th:text="${u.nombre}">Usuario</td>
                         <td th:text="${u.correo}">correo@dominio.com</td>
                         <td th:text="${u.telefono != null && !u.telefono.isEmpty() ? u.telefono : '-'}">-</td>
