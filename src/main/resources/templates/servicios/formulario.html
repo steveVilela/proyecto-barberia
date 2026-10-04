@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout(${servicio.idServicio == null ? 'Nuevo Servicio' : 'Editar Servicio'}, ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold" th:text="${servicio.idServicio == null ? 'Registrar Nuevo Servicio' : 'Editar Información del Servicio'}"></h2>
+            <span class="text-secondary small">Ingresa la información comercial y la imagen referencial</span>
+        </div>
+        <a th:href="@{/servicios}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Catálogo
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-custom p-4">
+                <form th:action="@{/servicios/guardar}" th:object="${servicio}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" th:field="*{idServicio}">
+                    <input type="hidden" th:field="*{fotoUrl}">
+
+                    <div class="row g-3">
+                        <!-- Nombre del Servicio -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Nombre del Servicio *</label>
+                            <input type="text" th:field="*{nombre}" class="form-control bg-dark text-white border-secondary" placeholder="Ej. Corte Fade Clásico" required>
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Precio (S/) *</label>
+                            <input type="number" step="0.50" th:field="*{precio}" class="form-control bg-dark text-white border-secondary" placeholder="Ej. 35.00" required>
+                        </div>
+
+                        <!-- Duración en minutos -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Duración Estimada (Minutos) *</label>
+                            <input type="number" th:field="*{duracion}" class="form-control bg-dark text-white border-secondary" placeholder="Ej. 45" required>
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Estado</label>
+                            <select th:field="*{estado}" class="form-select bg-dark text-white border-secondary">
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="INACTIVO">INACTIVO</option>
+                            </select>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-12">
+                            <label class="form-label text-secondary small">Descripción detallada</label>
+                            <textarea th:field="*{descripcion}" rows="3" class="form-control bg-dark text-white border-secondary" placeholder="Describe lo que incluye este servicio..."></textarea>
+                        </div>
+
+                        <!-- Foto del Servicio (Cámara o Galería sin forzar) -->
+                        <div class="col-12">
+                            <label class="form-label text-secondary small">Foto Referencial del Corte/Servicio</label>
+                            <input type="file" 
+                                   name="archivoFoto" 
+                                   id="inputFotoServicio" 
+                                   class="form-control bg-dark text-white border-secondary" 
+                                   accept="image/*">
+                            <div class="form-text text-secondary small">
+                                Puedes tomar una foto directa del corte o elegir una imagen guardada en tu galería o PC.
+                            </div>
+                        </div>
+
+                        <!-- Previsualización si ya existe foto -->
+                        <div class="col-12 text-center py-2" th:if="${servicio.fotoUrl != null and !servicio.fotoUrl.isEmpty()}">
+                            <span class="text-secondary small d-block mb-2">Foto actual registrada:</span>
+                            <img th:src="${servicio.fotoUrl}" class="rounded border border-warning object-fit-cover shadow" style="width: 140px; height: 100px;" alt="Foto Servicio">
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="col-12 mt-4 d-flex justify-content-end gap-2 border-top border-secondary pt-3">
+                            <a th:href="@{/servicios}" class="btn btn-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-gold px-4">
+                                <i class="bi bi-save me-1"></i> Guardar Servicio
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

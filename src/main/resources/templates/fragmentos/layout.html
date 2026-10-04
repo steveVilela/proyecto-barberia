@@ -165,32 +165,33 @@
                     </ul>
                 </div>
 
-                <!-- Perfil del Usuario y Salir -->
-                <div class="border-top border-secondary pt-3 mt-4" style="padding-bottom: 75px;">
-                    <div class="d-flex align-items-center mb-2">
-                        <!-- Foto de perfil o ícono alternativo -->
-                        <div class="me-2">
-                            <div th:if="${session.usuarioLogueado != null and session.usuarioLogueado.fotoUrl != null and !#strings.isEmpty(session.usuarioLogueado.fotoUrl)}">
-                                <img th:src="${session.usuarioLogueado.fotoUrl}" 
-                                     alt="Perfil" 
-                                     class="rounded-circle border border-warning shadow-sm" 
-                                     style="width: 36px; height: 36px; object-fit: cover;">
-                            </div>
-                            <div th:unless="${session.usuarioLogueado != null and session.usuarioLogueado.fotoUrl != null and !#strings.isEmpty(session.usuarioLogueado.fotoUrl)}">
-                                <i class="bi bi-person-circle fs-3 text-gold"></i>
-                            </div>
-                        </div>
-                        <div class="overflow-hidden">
-                            <small class="d-block fw-bold text-truncate text-white" 
-                                   th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.nombre : 'Usuario'}">Usuario</small>
-                            <span class="badge bg-gold small" 
-                                  th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.rol : 'ROL'}">ROL</span>
-                        </div>
-                    </div>
-                    <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger w-100 mt-2 py-2 fw-semibold">
-                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
-                    </a>
-                </div>
+				<!-- Perfil del Usuario y Salir -->
+				<div class="border-top border-secondary pt-3 mt-4" style="padding-bottom: 75px;">
+				    <div class="d-flex align-items-center mb-2">
+				        <!-- Foto de perfil o ícono alternativo -->
+				        <div class="me-2">
+				            <div th:if="${session.usuarioLogueado != null and session.usuarioLogueado.fotoUrl != null and !#strings.isEmpty(session.usuarioLogueado.fotoUrl)}">
+				                <img th:src="${session.usuarioLogueado.fotoUrl}" 
+				                     alt="Perfil" 
+				                     class="rounded-circle border border-warning shadow-sm" 
+				                     style="width: 36px; height: 36px; object-fit: cover;">
+				            </div>
+				            <div th:unless="${session.usuarioLogueado != null and session.usuarioLogueado.fotoUrl != null and !#strings.isEmpty(session.usuarioLogueado.fotoUrl)}">
+				                <i class="bi bi-person-circle fs-3 text-gold"></i>
+				            </div>
+				        </div>
+				        <div class="overflow-hidden">
+				            <small class="d-block fw-bold text-truncate text-white" 
+				                   th:text="${session.usuarioLogueado != null ? session.usuarioLogueado.nombre : 'Usuario'}">Usuario</small>
+				            <!-- AQUÍ VA LA INSIGNIA -->
+				            <span class="badge bg-gold small" 
+				                  th:text="${session.usuarioLogueado != null ? (session.usuarioLogueado.rol == 'BARBERO' ? 'JEFE LOCAL' : session.usuarioLogueado.rol) : 'ROL'}">ROL</span>
+				        </div>
+				    </div>
+				    <a th:href="@{/logout}" class="btn btn-sm btn-outline-danger w-100 mt-2 py-2 fw-semibold">
+				        <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
+				    </a>
+				</div>
 
             </div>
         </nav>
