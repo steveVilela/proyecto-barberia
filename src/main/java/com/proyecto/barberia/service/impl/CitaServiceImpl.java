@@ -1,6 +1,7 @@
 package com.proyecto.barberia.service.impl;
 
 import com.proyecto.barberia.model.Cita;
+import com.proyecto.barberia.model.Usuario;
 import com.proyecto.barberia.repository.ICitaRepository;
 import com.proyecto.barberia.service.ICitaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,11 @@ public class CitaServiceImpl implements ICitaService {
             cita.setEstado("PENDIENTE");
         }
         return citaRepository.save(cita);
+    }
+    
+    @Override
+    public List<Cita> listarPorUsuario(Usuario usuario) {
+        return citaRepository.findByUsuarioOrderByFechaDescHoraDesc(usuario);
     }
 
     @Override

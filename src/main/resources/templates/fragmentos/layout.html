@@ -148,19 +148,20 @@
 						                            </li>
 						                        </th:block>
 
-                        <!-- 3. Menú CLIENTE -->
-                        <th:block th:if="${session.usuarioLogueado.rol == 'CLIENTE'}">
-                            <li class="nav-item">
-                                <a class="nav-link" th:href="@{/cliente/mis-citas}">
-                                    <i class="bi bi-scissors me-2"></i> Servicios Disponibles
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" th:href="@{/citas}">
-                                    <i class="bi bi-clock-history me-2"></i> Mis Reservas
-                                </a>
-                            </li>
-                        </th:block>
+												<!-- 3. Menú CLIENTE -->
+												                        <th:block th:if="${session.usuarioLogueado.rol == 'CLIENTE'}">
+												                            <li class="nav-item">
+												                                <a class="nav-link" th:href="@{/cliente/mis-citas}">
+												                                    <i class="bi bi-scissors me-2"></i> Servicios Disponibles
+												                                </a>
+												                            </li>
+												                            <li class="nav-item">
+												                                <!-- CAMBIO AQUÍ: antes apuntaba a /citas, ahora apunta a /cliente/reservas -->
+												                                <a class="nav-link" th:href="@{/cliente/reservas}">
+												                                    <i class="bi bi-clock-history me-2"></i> Mis Reservas
+												                                </a>
+												                            </li>
+												                        </th:block>>
 
                     </ul>
                 </div>

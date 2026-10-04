@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Mis Reservas', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center pb-2 mb-4 border-bottom border-secondary">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Mis Reservas</h2>
+            <span class="text-secondary small">Historial y estado de tus citas solicitadas</span>
+        </div>
+        <a th:href="@{/cliente/reservar}" class="btn btn-gold btn-sm">
+            <i class="bi bi-calendar-plus me-1"></i> Nueva Reserva
+        </a>
+    </div>
+
+    <!-- Tabla personal de reservas -->
+    <div class="table-dark-custom p-3 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Barbero</th>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Observación</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${citas}">
+                        <td class="text-white" th:text="${#temporals.format(c.fecha, 'dd/MM/yyyy')}">04/10/2026</td>
+                        <td class="fw-bold text-gold" th:text="${c.hora}">10:25</td>
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-warning" 
+                                  th:text="${c.barbero != null ? c.barbero.nombre : 'Por asignar'}">Miguel Torres</span>
+                        </td>
+                        <td th:text="${c.servicio != null ? c.servicio.nombre : 'Corte'}">Corte + Barba</td>
+                        <td class="text-gold fw-semibold" th:text="${c.servicio != null ? 'S/ ' + #numbers.formatDecimal(c.servicio.precio, 1, 2) : '-'}">S/ 25.00</td>
+                        <td class="text-secondary small" th:text="${c.observacion != null and !c.observacion.isEmpty() ? c.observacion : '-'}">-</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${c.estado == 'CONFIRMADA' ? 'bg-success' : (c.estado == 'PENDIENTE' ? 'bg-warning text-dark' : (c.estado == 'FINALIZADA' ? 'bg-info text-dark' : 'bg-danger'))}"
+                                  th:text="${c.estado}">PENDIENTE</span>
+                        </td>
+                        <td class="text-center">
+                            <a th:if="${c.estado == 'PENDIENTE'}" 
+                               th:href="@{/cliente/cancelar/{id}(id=${c.idCita})}" 
+                               class="btn btn-sm btn-outline-danger" 
+                               title="Cancelar mi cita"
+                               onclick="return confirm('¿Seguro que deseas cancelar esta reserva?');">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </a>
+                            <span th:unless="${c.estado == 'PENDIENTE'}" class="text-secondary small">-</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(citas)}">
+                        <td colspan="8" class="text-center text-secondary py-4">
+                            No tienes ninguna reserva registrada actualmente. ¡Anímate a agendar una!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

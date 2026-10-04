@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{fragmentos/layout :: layout('Gestión General de Citas', ~{::content})}">
+<body>
+
+<div th:fragment="content">
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center pb-2 mb-4 border-bottom border-secondary gap-3">
+        <div>
+            <h2 class="h4 mb-0 fw-bold">Gestión de Citas</h2>
+            <span class="text-secondary small">Monitoreo, control y actualización de turnos</span>
+        </div>
+        
+        <!-- Filtro por Fecha -->
+        <form th:action="@{/citas}" method="get" class="d-flex align-items-center gap-2">
+            <input type="date" name="fecha" class="form-control form-control-sm bg-dark text-white border-secondary"
+                   th:value="${fechaFiltro}">
+            <button type="submit" class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-filter"></i> Filtrar
+            </button>
+            <a th:href="@{/citas}" class="btn btn-sm btn-outline-secondary" title="Ver todas">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+            <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'ADMIN'}" 
+               th:href="@{/citas/nueva}" class="btn btn-gold btn-sm ms-2">
+                <i class="bi bi-plus-circle me-1"></i> Agendar Cita
+            </a>
+        </form>
+    </div>
+
+    <!-- Tabla de Citas -->
+    <div class="table-dark-custom p-3 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;"># ID</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Cliente</th>
+                        <th>Barbero Asignado</th>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th class="text-center" style="width: 140px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cita : ${citas}">
+                        <td class="text-secondary" th:text="${cita.idCita}">1</td>
+                        <td th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">04/10/2026</td>
+                        <td class="fw-bold text-gold" th:text="${cita.hora}">10:00</td>
+                        <td>
+                            <strong class="d-block text-white" th:text="${cita.usuario != null ? cita.usuario.nombre : 'Cliente Desconocido'}">Juan</strong>
+                            <small class="text-secondary" th:text="${cita.usuario != null ? cita.usuario.telefono : ''}">999888777</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-warning" 
+                                  th:text="${cita.barbero != null ? cita.barbero.nombre : 'Sin barbero'}">Carlos</span>
+                        </td>
+                        <td th:text="${cita.servicio != null ? cita.servicio.nombre : 'Corte'}">Degradado</td>
+                        <td class="text-gold" th:text="${cita.servicio != null ? 'S/ ' + #numbers.formatDecimal(cita.servicio.precio, 1, 2) : '-'}">S/ 35.00</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${cita.estado == 'CONFIRMADA' ? 'bg-success' : (cita.estado == 'PENDIENTE' ? 'bg-warning text-dark' : (cita.estado == 'FINALIZADA' ? 'bg-info text-dark' : 'bg-danger'))}"
+                                  th:text="${cita.estado}">PENDIENTE</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <!-- Confirmar -->
+                                <a th:if="${cita.estado == 'PENDIENTE'}" 
+                                   th:href="@{/citas/estado/{id}/CONFIRMADA(id=${cita.idCita})}" 
+                                   class="btn btn-outline-success" 
+                                   title="Confirmar Cita">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                                <!-- Finalizar -->
+                                <a th:if="${cita.estado == 'CONFIRMADA'}" 
+                                   th:href="@{/citas/estado/{id}/FINALIZADA(id=${cita.idCita})}" 
+                                   class="btn btn-outline-info" 
+                                   title="Marcar como Atendido">
+                                    <i class="bi bi-scissors"></i>
+                                </a>
+                                <!-- Cancelar -->
+                                <a th:if="${cita.estado != 'CANCELADA' and cita.estado != 'FINALIZADA'}" 
+                                   th:href="@{/citas/estado/{id}/CANCELADA(id=${cita.idCita})}" 
+                                   class="btn btn-outline-danger" 
+                                   title="Cancelar Cita"
+                                   onclick="return confirm('¿Seguro que deseas cancelar esta cita?');">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(citas)}">
+                        <td colspan="9" class="text-center text-secondary py-4">
+                            No se encontraron citas registradas.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -10,9 +10,9 @@
             <h2 class="h4 mb-0 fw-bold">Panel de Cliente</h2>
             <span class="text-secondary small" th:text="'Bienvenido, ' + ${usuario.nombre}">Cliente</span>
         </div>
-        <a href="/citas/nueva" class="btn btn-outline-warning btn-sm">
-            <i class="bi bi-calendar-plus me-1"></i> Reservar Nueva Cita
-        </a>
+		<a th:href="@{/cliente/reservar}" class="btn btn-outline-warning btn-sm">
+		    <i class="bi bi-calendar-plus me-1"></i> Reservar Nueva Cita
+		</a>
     </div>
 
     <!-- Catálogo de Servicios Disponibles -->
