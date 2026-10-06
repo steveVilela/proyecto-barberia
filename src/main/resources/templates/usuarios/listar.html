@@ -60,11 +60,11 @@
                         <td class="fw-bold text-white" th:text="${u.nombre}">Usuario</td>
                         <td th:text="${u.correo}">correo@dominio.com</td>
                         <td th:text="${u.telefono != null && !u.telefono.isEmpty() ? u.telefono : '-'}">-</td>
-                        <td>
-                            <span class="badge" 
-                                  th:classappend="${u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'BARBERO' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
-                                  th:text="${u.rol}">ROL</span>
-                        </td>
+						<td>
+						    <span class="badge" 
+						          th:classappend="${u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'BARBERO' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
+						          th:text="${u.rol == 'BARBERO' ? 'JEFE LOCAL' : u.rol}">JEFE LOCAL</span>
+						</td>
                         <td>
                             <span class="badge" 
                                   th:classappend="${u.estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary'}"
