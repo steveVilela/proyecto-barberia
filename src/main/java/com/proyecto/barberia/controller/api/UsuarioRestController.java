@@ -38,4 +38,31 @@ public class UsuarioRestController {
                 .toList();
         return ResponseEntity.ok(clientes);
     }
+    @PostMapping("/{id}/foto")
+public ResponseEntity<?> subirFotoPerfil(@PathVariable("id") Integer id,
+                                         @RequestParam("foto") MultipartFile foto) {
+    Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+    if (usuarioOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    if (foto.isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("mensaje", "El archivo de imagen es requerido"));
+    }
+
+    try {
+        String urlPublica = gcpStorageService.subirArchivo(foto);
+        Usuario usuario = usuarioOpt.get();
+        usuario.setFotoUrl(urlPublica);
+        usuarioService.guardar(usuario);
+        
+        usuario.setPassword(null);
+        return ResponseEntity.ok(usuario); // Retorna el usuario con su nueva fotoUrl
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+    }
+}
+
+
+    
 }
