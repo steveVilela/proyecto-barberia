@@ -105,4 +105,37 @@ public class ClienteController {
         });
         return "redirect:/cliente/reservas";
     }
+
+    @GetMapping("/perfil")
+public String verPerfil(HttpSession session, Model model) {
+    Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+    if (usuario == null) return "redirect:/login";
+    model.addAttribute("usuario", usuario);
+    return "cliente/perfil";
+}
+
+@PostMapping("/perfil/actualizar-foto")
+public String actualizarFotoPerfil(@RequestParam("archivoFoto") MultipartFile archivoFoto,
+                                   HttpSession session,
+                                   RedirectAttributes redirect) {
+    Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+    if (usuario == null) return "redirect:/login";
+
+    if (!archivoFoto.isEmpty()) {
+        try {
+            // Reutiliza tu servicio de GCP existente
+            String url = gcpStorageService.subirArchivo(archivoFoto);
+            usuario.setFotoUrl(url);
+            usuarioService.guardar(usuario);
+            
+            // Actualizar la sesión activa para que el menú muestre la foto al instante
+            session.setAttribute("usuarioLogueado", usuario);
+            redirect.addFlashAttribute("mensaje", "Foto de perfil actualizada correctamente.");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Error al subir la imagen: " + e.getMessage());
+        }
+    }
+    return "redirect:/cliente/perfil";
+}
+
 }
