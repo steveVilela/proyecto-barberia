@@ -6,7 +6,7 @@ import com.proyecto.barberia.service.IBarberoService;
 import com.proyecto.barberia.service.ICitaService;
 import com.proyecto.barberia.service.IServicioService;
 import com.proyecto.barberia.service.IUsuarioService;
-import com.proyecto.barberia.service.GcpStorageService;
+import com.proyecto.barberia.service.ICloudStorageService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,7 +34,7 @@ public class ClienteController {
     private IUsuarioService usuarioService;
 
     @Autowired
-    private GcpStorageService gcpStorageService;
+    private ICloudStorageService cloudStorageService;
 
     // 1. Ver catálogo de servicios
     @GetMapping("/mis-citas")
@@ -127,7 +127,7 @@ public class ClienteController {
         return "cliente/perfil";
     }
 
-    // 7. Actualizar foto de perfil
+ // 7. Actualizar foto de perfil usando tu método registrarOActualizar
     @PostMapping("/perfil/actualizar-foto")
     public String actualizarFotoPerfil(@RequestParam("archivoFoto") MultipartFile archivoFoto,
                                        HttpSession session,
@@ -139,12 +139,11 @@ public class ClienteController {
 
         if (archivoFoto != null && !archivoFoto.isEmpty()) {
             try {
-                String url = gcpStorageService.subirArchivo(archivoFoto);
-                usuario.setFotoUrl(url);
-                usuarioService.guardar(usuario);
+                // Tu propio servicio se encarga de subir la foto a GCP y actualizar la entidad
+                Usuario usuarioActualizado = usuarioService.registrarOActualizar(usuario, archivoFoto);
                 
-                // Actualizar la sesión activa
-                session.setAttribute("usuarioLogueado", usuario);
+                // Actualiza la sesión para reflejar la foto en la barra de navegación
+                session.setAttribute("usuarioLogueado", usuarioActualizado);
                 redirect.addFlashAttribute("mensaje", "Foto de perfil actualizada con éxito.");
             } catch (Exception e) {
                 redirect.addFlashAttribute("error", "Error al procesar la foto: " + e.getMessage());
@@ -154,4 +153,4 @@ public class ClienteController {
         }
         return "redirect:/cliente/perfil";
     }
-}
+    }

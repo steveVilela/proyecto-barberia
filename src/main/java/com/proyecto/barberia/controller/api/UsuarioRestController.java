@@ -5,8 +5,10 @@ import com.proyecto.barberia.service.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*")
@@ -38,31 +40,29 @@ public class UsuarioRestController {
                 .toList();
         return ResponseEntity.ok(clientes);
     }
+
+    // 3. Subir foto de perfil desde Android o Postman
     @PostMapping("/{id}/foto")
-public ResponseEntity<?> subirFotoPerfil(@PathVariable("id") Integer id,
-                                         @RequestParam("foto") MultipartFile foto) {
-    Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
-    if (usuarioOpt.isEmpty()) {
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<?> subirFotoPerfil(@PathVariable("id") Integer id,
+                                             @RequestParam("foto") MultipartFile foto) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (foto == null || foto.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", "El archivo de imagen es requerido"));
+        }
+
+        try {
+            Usuario usuario = usuarioOpt.get();
+            // Tu propio método se encarga de subir el archivo a GCP y guardar el usuario
+            Usuario usuarioActualizado = usuarioService.registrarOActualizar(usuario, foto);
+            
+            usuarioActualizado.setPassword(null);
+            return ResponseEntity.ok(usuarioActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
     }
-
-    if (foto.isEmpty()) {
-        return ResponseEntity.badRequest().body(Map.of("mensaje", "El archivo de imagen es requerido"));
-    }
-
-    try {
-        String urlPublica = gcpStorageService.subirArchivo(foto);
-        Usuario usuario = usuarioOpt.get();
-        usuario.setFotoUrl(urlPublica);
-        usuarioService.guardar(usuario);
-        
-        usuario.setPassword(null);
-        return ResponseEntity.ok(usuario); // Retorna el usuario con su nueva fotoUrl
-    } catch (Exception e) {
-        return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
-    }
-}
-
-
-    
 }
