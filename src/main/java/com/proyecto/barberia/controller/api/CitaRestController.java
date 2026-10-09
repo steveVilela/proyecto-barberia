@@ -53,7 +53,36 @@ public class CitaRestController {
         }
     }
 
-    // 3. Cancelar una cita desde la app móvil
+    // 3. Modificar / Reprogramar una cita existente
+    @PutMapping("/modificar/{idCita}")
+    public ResponseEntity<?> modificarCita(@PathVariable("idCita") Integer idCita, @RequestBody Cita citaActualizada) {
+        Optional<Cita> citaOpt = citaService.buscarPorId(idCita);
+        if (citaOpt.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", "Cita no encontrada");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        try {
+            Cita citaExistente = citaOpt.get();
+
+            // Actualizar campos que envía la app móvil
+            if (citaActualizada.getFecha() != null) citaExistente.setFecha(citaActualizada.getFecha());
+            if (citaActualizada.getHora() != null) citaExistente.setHora(citaActualizada.getHora());
+            if (citaActualizada.getBarbero() != null) citaExistente.setBarbero(citaActualizada.getBarbero());
+            if (citaActualizada.getServicio() != null) citaExistente.setServicio(citaActualizada.getServicio());
+            if (citaActualizada.getObservacion() != null) citaExistente.setObservacion(citaActualizada.getObservacion());
+
+            Cita citaGuardada = citaService.registrarOActualizar(citaExistente);
+            return ResponseEntity.ok(citaGuardada);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", "Error al modificar la cita: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // 4. Cancelar una cita desde la app móvil
     @PutMapping("/cancelar/{idCita}")
     public ResponseEntity<?> cancelarCita(@PathVariable("idCita") Integer idCita) {
         Optional<Cita> citaOpt = citaService.buscarPorId(idCita);

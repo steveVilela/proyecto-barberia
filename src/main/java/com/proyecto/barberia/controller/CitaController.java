@@ -32,7 +32,7 @@ public class CitaController {
     @Autowired
     private IUsuarioService usuarioService;
 
-    // Listar citas (Para ADMIN o JEFE LOCAL / BARBERO)
+    // 1. Listar citas (Para ADMIN o JEFE LOCAL / BARBERO)
     @GetMapping
     public String listarCitas(@RequestParam(value = "fecha", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
                               HttpSession session, 
@@ -55,7 +55,7 @@ public class CitaController {
         return "citas/listar";
     }
 
- // Formulario para nueva Cita (Administración / Manual)
+    // 2. Formulario para nueva Cita (Administración / Manual)
     @GetMapping("/nueva")
     public String nuevaCita(HttpSession session, Model model) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
@@ -73,9 +73,33 @@ public class CitaController {
         model.addAttribute("servicios", servicioService.listarActivos());
         model.addAttribute("usuarios", clientes);
         return "citas/formulario";
-    }    
-    
-    // Guardar cita
+    }
+
+    // 3. Formulario para editar / reprogramar Cita existente (Web Admin)
+    @GetMapping("/editar/{id}")
+    public String editarCita(@PathVariable("id") Integer id, HttpSession session, Model model) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (usuario == null || !"ADMIN".equalsIgnoreCase(usuario.getRol())) {
+            return "redirect:/citas";
+        }
+
+        Cita cita = citaService.buscarPorId(id).orElse(null);
+        if (cita == null) {
+            return "redirect:/citas";
+        }
+
+        List<Usuario> clientes = usuarioService.listarTodos().stream()
+                .filter(u -> "CLIENTE".equalsIgnoreCase(u.getRol()) && "ACTIVO".equalsIgnoreCase(u.getEstado()))
+                .toList();
+
+        model.addAttribute("cita", cita);
+        model.addAttribute("barberos", barberoService.listarActivos());
+        model.addAttribute("servicios", servicioService.listarActivos());
+        model.addAttribute("usuarios", clientes);
+        return "citas/formulario";
+    }
+
+    // 4. Guardar o Modificar cita
     @PostMapping("/guardar")
     public String guardarCita(@ModelAttribute("cita") Cita cita, HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
@@ -83,11 +107,16 @@ public class CitaController {
             return "redirect:/login";
         }
 
+        // Si es una cita nueva que aún no tiene estado asignado, se inicia en PENDIENTE
+        if (cita.getIdCita() == null && cita.getEstado() == null) {
+            cita.setEstado("PENDIENTE");
+        }
+
         citaService.registrarOActualizar(cita);
         return "redirect:/citas";
     }
 
-    // Cambiar estado rápido: CONFIRMADA, FINALIZADA, CANCELADA
+    // 5. Cambiar estado rápido: CONFIRMADA, FINALIZADA, CANCELADA
     @GetMapping("/estado/{id}/{nuevoEstado}")
     public String cambiarEstado(@PathVariable("id") Integer id, 
                                 @PathVariable("nuevoEstado") String nuevoEstado,

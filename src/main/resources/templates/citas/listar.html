@@ -42,7 +42,7 @@
                         <th>Servicio</th>
                         <th>Precio</th>
                         <th>Estado</th>
-                        <th class="text-center" style="width: 140px;">Acciones</th>
+                        <th class="text-center" style="width: 170px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,6 +67,14 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
+                                <!-- Editar / Reprogramar (Solo ADMIN y citas activas) -->
+                                <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'ADMIN' and cita.estado != 'CANCELADA' and cita.estado != 'FINALIZADA'}"
+                                   th:href="@{/citas/editar/{id}(id=${cita.idCita})}" 
+                                   class="btn btn-outline-warning" 
+                                   title="Editar / Reprogramar Cita">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
                                 <!-- Confirmar -->
                                 <a th:if="${cita.estado == 'PENDIENTE'}" 
                                    th:href="@{/citas/estado/{id}/CONFIRMADA(id=${cita.idCita})}" 
@@ -74,6 +82,7 @@
                                    title="Confirmar Cita">
                                     <i class="bi bi-check-lg"></i>
                                 </a>
+
                                 <!-- Finalizar -->
                                 <a th:if="${cita.estado == 'CONFIRMADA'}" 
                                    th:href="@{/citas/estado/{id}/FINALIZADA(id=${cita.idCita})}" 
@@ -81,6 +90,7 @@
                                    title="Marcar como Atendido">
                                     <i class="bi bi-scissors"></i>
                                 </a>
+
                                 <!-- Cancelar -->
                                 <a th:if="${cita.estado != 'CANCELADA' and cita.estado != 'FINALIZADA'}" 
                                    th:href="@{/citas/estado/{id}/CANCELADA(id=${cita.idCita})}" 
