@@ -36,3 +36,4 @@ build/
 .settings/
 .classpath
 .project
+gcp-credentials.json
