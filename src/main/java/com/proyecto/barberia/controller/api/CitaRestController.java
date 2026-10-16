@@ -1,15 +1,23 @@
+
 package com.proyecto.barberia.controller.api;
 
+import com.proyecto.barberia.model.Barbero;
 import com.proyecto.barberia.model.Cita;
+import com.proyecto.barberia.model.Servicio;
 import com.proyecto.barberia.model.Usuario;
+import com.proyecto.barberia.service.IBarberoService;
 import com.proyecto.barberia.service.ICitaService;
+import com.proyecto.barberia.service.IServicioService;
 import com.proyecto.barberia.service.IUsuarioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,78 +31,289 @@ public class CitaRestController {
     private ICitaService citaService;
 
     @Autowired
+    private IBarberoService barberoService;
+
+    @Autowired
+    private IServicioService servicioService;
+
+    @Autowired
     private IUsuarioService usuarioService;
 
-    // 1. Obtener todas las reservas de un cliente específico (para su RecyclerView en Android)
+    // 1. Listar citas de un usuario
     @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<?> listarPorUsuario(@PathVariable("idUsuario") Integer idUsuario) {
-        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(idUsuario);
+    public ResponseEntity<?> listarPorUsuario(
+            @PathVariable Integer idUsuario) {
+
+        Optional<Usuario> usuarioOpt =
+                usuarioService.buscarPorId(idUsuario);
+
         if (usuarioOpt.isEmpty()) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Usuario no encontrado");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            return error(HttpStatus.NOT_FOUND,
+                    "Usuario no encontrado");
         }
 
-        List<Cita> citas = citaService.listarPorUsuario(usuarioOpt.get());
-        return ResponseEntity.ok(citas);
+        List<Map<String, Object>> resultado =
+                citaService.listarPorUsuario(usuarioOpt.get())
+                        .stream()
+                        .map(this::convertirCita)
+                        .toList();
+
+        return ResponseEntity.ok(resultado);
     }
 
-    // 2. Registrar una nueva reserva desde el teléfono móvil
+    // 2. Registrar una cita desde Android
     @PostMapping("/reservar")
-    public ResponseEntity<?> registrarCita(@RequestBody Cita cita) {
+    public ResponseEntity<?> registrarCita(
+            @RequestBody Map<String, Object> datos) {
+
         try {
+            Integer idUsuario = leerId(datos, "idUsuario");
+            Integer idBarbero = leerId(datos, "idBarbero");
+            Integer idServicio = leerId(datos, "idServicio");
+
+            LocalDate fecha = LocalDate.parse(
+                    leerTexto(datos, "fecha"));
+
+            LocalTime hora = LocalTime.parse(
+                    leerTexto(datos, "hora"));
+
+            Usuario usuario = usuarioService.buscarPorId(idUsuario)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Usuario no encontrado"));
+
+            Barbero barbero = barberoService.buscarPorId(idBarbero)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Barbero no encontrado"));
+
+            Servicio servicio = servicioService.buscarPorId(idServicio)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Servicio no encontrado"));
+
+            validarDisponibilidad(fecha, hora, barbero, servicio);
+
+            Cita cita = new Cita();
+            cita.setUsuario(usuario);
+            cita.setBarbero(barbero);
+            cita.setServicio(servicio);
+            cita.setFecha(fecha);
+            cita.setHora(hora);
+            cita.setObservacion(
+                    datos.get("observacion") == null
+                            ? null
+                            : datos.get("observacion").toString());
             cita.setEstado("PENDIENTE");
-            Cita nuevaCita = citaService.registrarOActualizar(cita);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
+
+            Cita guardada =
+                    citaService.registrarOActualizar(cita);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(convertirCita(guardada));
+
+        } catch (IllegalArgumentException e) {
+            return error(HttpStatus.BAD_REQUEST,
+                    e.getMessage() == null
+                            ? "Datos inválidos"
+                            : e.getMessage());
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Error al registrar la cita: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            return error(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo registrar la cita");
         }
     }
 
-    // 3. Modificar / Reprogramar una cita existente
+    // 3. Modificar o reprogramar una cita
     @PutMapping("/modificar/{idCita}")
-    public ResponseEntity<?> modificarCita(@PathVariable("idCita") Integer idCita, @RequestBody Cita citaActualizada) {
+    public ResponseEntity<?> modificarCita(
+            @PathVariable Integer idCita,
+            @RequestBody Map<String, Object> datos) {
+
         Optional<Cita> citaOpt = citaService.buscarPorId(idCita);
+
         if (citaOpt.isEmpty()) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Cita no encontrada");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            return error(HttpStatus.NOT_FOUND,
+                    "Cita no encontrada");
         }
 
         try {
-            Cita citaExistente = citaOpt.get();
+            Cita cita = citaOpt.get();
 
-            // Actualizar campos que envía la app móvil
-            if (citaActualizada.getFecha() != null) citaExistente.setFecha(citaActualizada.getFecha());
-            if (citaActualizada.getHora() != null) citaExistente.setHora(citaActualizada.getHora());
-            if (citaActualizada.getBarbero() != null) citaExistente.setBarbero(citaActualizada.getBarbero());
-            if (citaActualizada.getServicio() != null) citaExistente.setServicio(citaActualizada.getServicio());
-            if (citaActualizada.getObservacion() != null) citaExistente.setObservacion(citaActualizada.getObservacion());
+            if ("CANCELADA".equalsIgnoreCase(cita.getEstado())
+                    || "FINALIZADA".equalsIgnoreCase(cita.getEstado())) {
+                return error(HttpStatus.BAD_REQUEST,
+                        "Esta cita no se puede modificar");
+            }
 
-            Cita citaGuardada = citaService.registrarOActualizar(citaExistente);
-            return ResponseEntity.ok(citaGuardada);
+            LocalDate fecha = cita.getFecha();
+            LocalTime hora = cita.getHora();
+            Barbero barbero = cita.getBarbero();
+            Servicio servicio = cita.getServicio();
+
+            if (datos.containsKey("fecha")) {
+                fecha = LocalDate.parse(
+                        leerTexto(datos, "fecha"));
+            }
+
+            if (datos.containsKey("hora")) {
+                hora = LocalTime.parse(
+                        leerTexto(datos, "hora"));
+            }
+
+            if (datos.containsKey("idBarbero")) {
+                Integer idBarbero = leerId(datos, "idBarbero");
+
+                barbero = barberoService.buscarPorId(idBarbero)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Barbero no encontrado"));
+            }
+
+            if (datos.containsKey("idServicio")) {
+                Integer idServicio = leerId(datos, "idServicio");
+
+                servicio = servicioService.buscarPorId(idServicio)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Servicio no encontrado"));
+            }
+
+            validarDisponibilidad(fecha, hora, barbero, servicio);
+
+            cita.setFecha(fecha);
+            cita.setHora(hora);
+            cita.setBarbero(barbero);
+            cita.setServicio(servicio);
+
+            if (datos.containsKey("observacion")) {
+                cita.setObservacion(
+                        datos.get("observacion") == null
+                                ? null
+                                : datos.get("observacion").toString());
+            }
+
+            Cita guardada =
+                    citaService.registrarOActualizar(cita);
+
+            return ResponseEntity.ok(convertirCita(guardada));
+
+        } catch (IllegalArgumentException e) {
+            return error(HttpStatus.BAD_REQUEST,
+                    e.getMessage() == null
+                            ? "Datos inválidos"
+                            : e.getMessage());
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Error al modificar la cita: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            return error(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo modificar la cita");
         }
     }
 
-    // 4. Cancelar una cita desde la app móvil
+    // 4. Cancelar una cita
     @PutMapping("/cancelar/{idCita}")
-    public ResponseEntity<?> cancelarCita(@PathVariable("idCita") Integer idCita) {
+    public ResponseEntity<?> cancelarCita(
+            @PathVariable Integer idCita) {
+
         Optional<Cita> citaOpt = citaService.buscarPorId(idCita);
+
         if (citaOpt.isEmpty()) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Cita no encontrada");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            return error(HttpStatus.NOT_FOUND,
+                    "Cita no encontrada");
+        }
+
+        Cita cita = citaOpt.get();
+
+        if ("CANCELADA".equalsIgnoreCase(cita.getEstado())
+                || "FINALIZADA".equalsIgnoreCase(cita.getEstado())) {
+            return error(HttpStatus.BAD_REQUEST,
+                    "Esta cita no se puede cancelar");
         }
 
         citaService.cambiarEstado(idCita, "CANCELADA");
-        Map<String, String> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Cita cancelada con éxito");
-        return ResponseEntity.ok(respuesta);
+
+        return ResponseEntity.ok(
+                Map.of("mensaje", "Cita cancelada correctamente"));
+    }
+
+    // Validaciones compartidas para registrar y modificar
+    private void validarDisponibilidad(
+            LocalDate fecha,
+            LocalTime hora,
+            Barbero barbero,
+            Servicio servicio) {
+
+        if (!"ACTIVO".equalsIgnoreCase(barbero.getEstado())) {
+            throw new IllegalArgumentException(
+                    "El barbero no está activo");
+        }
+
+        if (!"ACTIVO".equalsIgnoreCase(servicio.getEstado())) {
+            throw new IllegalArgumentException(
+                    "El servicio no está activo");
+        }
+
+        if (fecha.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "La fecha no puede estar en el pasado");
+        }
+
+        if (fecha.equals(LocalDate.now())
+                && hora.isBefore(LocalTime.now())) {
+            throw new IllegalArgumentException(
+                    "La hora seleccionada ya pasó");
+        }
+    }
+
+    // Convertir la entidad a JSON sencillo para Android
+    private Map<String, Object> convertirCita(Cita cita) {
+        Map<String, Object> datos = new LinkedHashMap<>();
+
+        datos.put("idCita", cita.getIdCita());
+        datos.put("idUsuario", cita.getUsuario().getIdUsuario());
+        datos.put("idBarbero", cita.getBarbero().getIdBarbero());
+        datos.put("nombreBarbero", cita.getBarbero().getNombre());
+        datos.put("idServicio", cita.getServicio().getIdServicio());
+        datos.put("nombreServicio", cita.getServicio().getNombre());
+        datos.put("fecha", cita.getFecha().toString());
+        datos.put("hora", cita.getHora().toString());
+        datos.put("observacion", cita.getObservacion());
+        datos.put("estado", cita.getEstado());
+
+        return datos;
+    }
+
+    private Integer leerId(
+            Map<String, Object> datos,
+            String clave) {
+
+        String valor = leerTexto(datos, clave);
+
+        try {
+            return Integer.valueOf(valor);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "El campo " + clave + " no es válido");
+        }
+    }
+
+    private String leerTexto(
+            Map<String, Object> datos,
+            String clave) {
+
+        Object valor = datos.get(clave);
+
+        if (valor == null || valor.toString().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Falta el campo " + clave);
+        }
+
+        return valor.toString();
+    }
+
+    private ResponseEntity<Map<String, String>> error(
+            HttpStatus estado,
+            String mensaje) {
+
+        return ResponseEntity.status(estado)
+                .body(Map.of("mensaje", mensaje));
     }
 }
