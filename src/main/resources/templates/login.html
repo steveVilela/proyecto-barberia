@@ -56,13 +56,7 @@
         <p class="text-secondary small">Panel de Control & Gestión de Citas</p>
     </div>
 
-    <!-- Mensaje de error si falla la autenticación -->
-    <div th:if="${error}" class="alert alert-danger py-2 small" role="alert" th:text="${error}"></div>
-    
-    <!-- Mensaje al cerrar sesión -->
-    <div th:if="${param.logout}" class="alert alert-info py-2 small" role="alert">Sesión finalizada correctamente.</div>
-
-    <form th:action="@{/login}" method="post">
+    <form id="formLogin" th:action="@{/login}" method="post">
         <div class="mb-3">
             <label class="form-label small text-secondary">Correo Electrónico</label>
             <div class="input-group">
@@ -82,6 +76,63 @@
         <button type="submit" class="btn btn-gold w-100 py-2">Ingresar al Sistema</button>
     </form>
 </div>
+
+<!-- ========================================== -->
+<!-- SCRIPTS PARA SWEETALERT2 -->
+<!-- ========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. Mostrar mensaje de Error de credenciales
+        var mensajeError = /*[[${error}]]*/ null;
+        if (mensajeError) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acceso Denegado',
+                text: mensajeError,
+                background: '#1e1e1e', // Mismo color de fondo de la tarjeta
+                color: '#ffffff',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Reintentar'
+            });
+        }
+
+        // 2. Mostrar mensaje de Sesión Finalizada si la URL contiene ?logout
+        var parametroLogout = /*[[${param.logout != null}]]*/ false;
+        if (parametroLogout) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Hasta pronto!',
+                text: 'Sesión finalizada correctamente.',
+                background: '#1e1e1e',
+                color: '#ffffff',
+                confirmButtonColor: '#d4af37',
+                confirmButtonText: 'Aceptar',
+                timer: 3000, // Se cierra solo después de 3 segundos
+                timerProgressBar: true
+            });
+        }
+
+        // 3. Bloquear pantalla y mostrar "Iniciando sesión..." al enviar
+        const form = document.getElementById('formLogin');
+        form.addEventListener('submit', function() {
+            Swal.fire({
+                title: 'Iniciando sesión...',
+                text: 'Verificando credenciales, por favor espera.',
+                background: '#1e1e1e',
+                color: '#ffffff',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        });
+
+    });
+    /*]]>*/
+</script>
 
 </body>
 </html>
