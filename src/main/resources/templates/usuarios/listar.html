@@ -15,16 +15,6 @@
         </a>
     </div>
 
-    <!-- Mensajes Flash -->
-    <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show bg-success text-white border-0" role="alert">
-        <i class="bi bi-check-circle me-2"></i><span th:text="${mensaje}"></span>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show bg-danger text-white border-0" role="alert">
-        <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${error}"></span>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
     <!-- Tabla de Usuarios -->
     <div class="table-dark-custom p-3">
         <div class="table-responsive">
@@ -60,11 +50,11 @@
                         <td class="fw-bold text-white" th:text="${u.nombre}">Usuario</td>
                         <td th:text="${u.correo}">correo@dominio.com</td>
                         <td th:text="${u.telefono != null && !u.telefono.isEmpty() ? u.telefono : '-'}">-</td>
-						<td>
-						    <span class="badge" 
-						          th:classappend="${u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'BARBERO' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
-						          th:text="${u.rol == 'BARBERO' ? 'JEFE LOCAL' : u.rol}">JEFE LOCAL</span>
-						</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${u.rol == 'ADMIN' ? 'bg-danger' : (u.rol == 'BARBERO' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
+                                  th:text="${u.rol == 'BARBERO' ? 'JEFE LOCAL' : u.rol}">JEFE LOCAL</span>
+                        </td>
                         <td>
                             <span class="badge" 
                                   th:classappend="${u.estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary'}"
@@ -75,9 +65,9 @@
                                 <a th:href="@{/admin/usuarios/editar/{id}(id=${u.idUsuario})}" class="btn btn-outline-warning" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
+                                <!-- Se reemplazó el onclick por la clase btn-eliminar -->
                                 <a th:href="@{/admin/usuarios/eliminar/{id}(id=${u.idUsuario})}" 
-                                   class="btn btn-outline-danger" 
-                                   onclick="return confirm('¿Estás seguro de eliminar este usuario?')" 
+                                   class="btn btn-outline-danger btn-eliminar" 
                                    title="Eliminar">
                                     <i class="bi bi-trash"></i>
                                 </a>
@@ -93,6 +83,73 @@
             </table>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA SWEETALERT2 -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Mostrar mensajes de éxito (ej. Usuario guardado)
+            var mensajeExito = /*[[${mensaje}]]*/ null;
+            if (mensajeExito) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Operación Exitosa!',
+                    text: mensajeExito,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+
+            // 1.1 Mostrar mensajes de error (si viene desde el controlador)
+            var mensajeError = /*[[${error}]]*/ null;
+            if (mensajeError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensajeError,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            // 2. Lógica para el botón de Eliminar Usuario
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            
+            botonesEliminar.forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault(); // Detiene la redirección inmediata
+                    const urlDestino = this.getAttribute('href'); 
+
+                    Swal.fire({
+                        title: '¿Eliminar Usuario?',
+                        text: '¿Seguro que deseas eliminar a este usuario del sistema? Esta acción no se puede deshacer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        background: '#212529',
+                        color: '#ffffff',
+                        confirmButtonColor: '#dc3545', // Botón rojo
+                        cancelButtonColor: '#6c757d',  // Botón gris
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        // Si confirma, ejecutamos el link
+                        if (result.isConfirmed) {
+                            window.location.href = urlDestino;
+                        }
+                    });
+                });
+            });
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
