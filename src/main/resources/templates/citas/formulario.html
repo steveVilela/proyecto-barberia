@@ -16,7 +16,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card card-custom p-4 shadow-sm">
+            <div class="card card-custom p-4 shadow-sm bg-dark">
                 <form th:action="@{/citas/guardar}" th:object="${cita}" method="post">
                     <input type="hidden" th:field="*{idCita}">
                     <input type="hidden" th:field="*{estado}" th:value="${cita.estado != null ? cita.estado : 'PENDIENTE'}">
@@ -29,7 +29,7 @@
                                 <option value="" disabled selected>-- Selecciona un cliente --</option>
                                 <option th:each="u : ${usuarios}" 
                                         th:value="${u.idUsuario}" 
-                                        th:text="${u.nombre} + ' (' + ${u.correo} + ')'">Juan Pérez (juan@mail.com)</option>
+                                        th:text="${u.nombre} + ' (' + ${u.correo} + ')'"></option>
                             </select>
                         </div>
 
@@ -40,7 +40,7 @@
                                 <option value="" disabled selected>-- Selecciona un barbero --</option>
                                 <option th:each="b : ${barberos}" 
                                         th:value="${b.idBarbero}" 
-                                        th:text="${b.nombre} + ' - ' + ${b.especialidad}">Carlos - Fade / Diseños</option>
+                                        th:text="${b.nombre} + ' - ' + ${b.especialidad}"></option>
                             </select>
                         </div>
 
@@ -52,7 +52,6 @@
                                 <option th:each="s : ${servicios}" 
                                         th:value="${s.idServicio}" 
                                         th:text="${s.nombre} + ' | S/ ' + ${#numbers.formatDecimal(s.precio, 1, 2)} + ' (' + ${s.duracion} + ' min)'">
-                                    Corte Clásico | S/ 15.00 (30 min)
                                 </option>
                             </select>
                         </div>
@@ -88,6 +87,47 @@
             </div>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA SWEETALERT2 -->
+    <!-- ========================================== -->
+    <!-- Importamos SweetAlert2 (Si ya lo tienes en tu layout.html puedes borrar esta línea) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Script para capturar los mensajes de Spring Boot -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Recuperamos los atributos flash que envía el CitaController
+        var mensajeError = /*[[${error}]]*/ null;
+        var mensajeExito = /*[[${exito}]]*/ null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (mensajeError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Horario no disponible',
+                    text: mensajeError,
+                    background: '#212529', // Fondo oscuro tipo bg-dark
+                    color: '#ffffff',      // Texto blanco
+                    confirmButtonColor: '#dc3545', // Botón rojo
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            if (mensajeExito) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: mensajeExito,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37', // Color dorado para combinar con btn-gold
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
