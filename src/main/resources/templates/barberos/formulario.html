@@ -16,8 +16,8 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card card-custom p-4">
-                <form th:action="@{/barberos/guardar}" th:object="${barbero}" method="post" enctype="multipart/form-data">
+            <div class="card card-custom p-4 bg-dark">
+                <form id="formBarbero" th:action="@{/barberos/guardar}" th:object="${barbero}" method="post" enctype="multipart/form-data">
                     <input type="hidden" th:field="*{idBarbero}">
                     <input type="hidden" th:field="*{fotoUrl}">
 
@@ -43,7 +43,7 @@
                             </select>
                         </div>
 
-                        <!-- Subida de Foto a GCP (Cámara o Galería) -->
+                        <!-- Subida de Foto a GCP -->
                         <div class="col-md-6">
                             <label class="form-label text-secondary small">Foto de Perfil (JPG, PNG)</label>
                             <input type="file" 
@@ -56,10 +56,14 @@
                             </div>
                         </div>
 
-                        <!-- Previsualización de la Foto -->
-                        <div class="col-12 text-center py-2" th:if="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty()}">
-                            <span class="text-secondary small d-block mb-2">Foto actual registrada en Cloud Storage:</span>
-                            <img th:src="${barbero.fotoUrl}" class="rounded-circle border border-warning object-fit-cover shadow" style="width: 90px; height: 90px;" alt="Foto Barbero">
+                        <!-- Previsualización de la Foto (Nueva o Actual) -->
+                        <div class="col-12 text-center py-2" id="previewContainer" th:style="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty() ? 'display:block;' : 'display:none;'}">
+                            <span class="text-secondary small d-block mb-2" id="previewTexto">
+                                <span th:text="${barbero.fotoUrl != null and !barbero.fotoUrl.isEmpty() ? 'Foto actual en sistema:' : 'Previsualización de nueva foto:'}"></span>
+                            </span>
+                            <img id="previewImg" th:src="${barbero.fotoUrl != null ? barbero.fotoUrl : '#'}" 
+                                 class="rounded-circle border border-warning object-fit-cover shadow" 
+                                 style="width: 90px; height: 90px;" alt="Foto Barbero">
                         </div>
 
                         <!-- Botones de Acción -->
@@ -74,6 +78,68 @@
             </div>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA PREVIEW Y SWEETALERT2 -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Mostrar alertas si falla el guardado en el backend
+            var mensajeError = /*[[${error}]]*/ null;
+            if (mensajeError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo guardar',
+                    text: mensajeError,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Revisar'
+                });
+            }
+
+            // 2. Mostrar la foto apenas se elige (antes de subirla)
+            const inputFoto = document.getElementById('inputFoto');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImg = document.getElementById('previewImg');
+            const previewTexto = document.getElementById('previewTexto');
+
+            if (inputFoto) {
+                inputFoto.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            previewTexto.innerHTML = 'Previsualización de nueva foto:';
+                            previewContainer.style.display = 'block';
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 3. Evitar doble clic y mostrar pantalla de carga al enviar el formulario
+            const form = document.getElementById('formBarbero');
+            form.addEventListener('submit', function() {
+                Swal.fire({
+                    title: 'Guardando...',
+                    text: 'Subiendo datos e imagen al servidor, por favor espera.',
+                    background: '#212529',
+                    color: '#ffffff',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
