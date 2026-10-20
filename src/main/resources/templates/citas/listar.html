@@ -67,7 +67,7 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
-                                <!-- Editar / Reprogramar (Solo ADMIN y citas activas) -->
+                                <!-- Editar / Reprogramar -->
                                 <a th:if="${session.usuarioLogueado != null and session.usuarioLogueado.rol == 'ADMIN' and cita.estado != 'CANCELADA' and cita.estado != 'FINALIZADA'}"
                                    th:href="@{/citas/editar/{id}(id=${cita.idCita})}" 
                                    class="btn btn-outline-warning" 
@@ -91,12 +91,11 @@
                                     <i class="bi bi-scissors"></i>
                                 </a>
 
-                                <!-- Cancelar -->
+                                <!-- Cancelar (Ahora usa la clase btn-cancelar en lugar del onclick nativo) -->
                                 <a th:if="${cita.estado != 'CANCELADA' and cita.estado != 'FINALIZADA'}" 
                                    th:href="@{/citas/estado/{id}/CANCELADA(id=${cita.idCita})}" 
-                                   class="btn btn-outline-danger" 
-                                   title="Cancelar Cita"
-                                   onclick="return confirm('¿Seguro que deseas cancelar esta cita?');">
+                                   class="btn btn-outline-danger btn-cancelar" 
+                                   title="Cancelar Cita">
                                     <i class="bi bi-x-lg"></i>
                                 </a>
                             </div>
@@ -111,6 +110,59 @@
             </table>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA SWEETALERT2 -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Mostrar mensajes de éxito que puedan venir del Controlador
+            var mensajeExito = /*[[${exito}]]*/ null;
+            if (mensajeExito) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: mensajeExito,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+
+            // 2. Lógica para el botón de Cancelar Cita
+            const botonesCancelar = document.querySelectorAll('.btn-cancelar');
+            
+            botonesCancelar.forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault(); // Detiene la navegación inmediata
+                    const urlDestino = this.getAttribute('href'); // Guarda el link de cancelación
+
+                    Swal.fire({
+                        title: '¿Cancelar Cita?',
+                        text: '¿Estás seguro de que deseas cancelar esta cita? Esta acción la marcará como cancelada.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        background: '#212529',
+                        color: '#ffffff',
+                        confirmButtonColor: '#dc3545', // Botón rojo para cancelar
+                        cancelButtonColor: '#6c757d',  // Botón gris para mantener
+                        confirmButtonText: 'Sí, cancelar cita',
+                        cancelButtonText: 'No, mantenerla'
+                    }).then((result) => {
+                        // Si el usuario presiona "Sí, cancelar cita", lo mandamos a la URL
+                        if (result.isConfirmed) {
+                            window.location.href = urlDestino;
+                        }
+                    });
+                });
+            });
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
