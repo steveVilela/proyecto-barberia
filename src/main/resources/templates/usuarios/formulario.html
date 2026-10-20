@@ -16,8 +16,9 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card card-custom p-4">
-                <form th:action="@{/admin/usuarios/guardar}" th:object="${usuarioForm}" method="post" enctype="multipart/form-data">
+            <div class="card card-custom p-4 bg-dark">
+                <!-- Se agregó el ID formUsuario para el SweetAlert -->
+                <form id="formUsuario" th:action="@{/admin/usuarios/guardar}" th:object="${usuarioForm}" method="post" enctype="multipart/form-data">
                     <input type="hidden" th:field="*{idUsuario}">
                     <input type="hidden" th:field="*{fotoUrl}">
 
@@ -37,7 +38,7 @@
                         <!-- Contraseña -->
                         <div class="col-md-6">
                             <label class="form-label text-secondary small">
-                                Contraseña <span th:if="${usuarioForm.idUsuario != null}">(Dejar en blanco para mantener actual)</span>*
+                                Contraseña <span th:if="${usuarioForm.idUsuario != null}">(Dejar en blanco para mantener actual)</span><span th:if="${usuarioForm.idUsuario == null}">*</span>
                             </label>
                             <input type="password" th:field="*{password}" class="form-control bg-dark text-white border-secondary" 
                                    th:required="${usuarioForm.idUsuario == null}" placeholder="******">
@@ -71,9 +72,10 @@
                         <!-- Foto con opción de Tomar Foto o Galería -->
                         <div class="col-12">
                             <label class="form-label text-secondary small">Foto de Perfil (Opcional)</label>
+                            <!-- ID cambiado a inputFoto para previsualización JS -->
                             <input type="file" 
                                    name="archivoFoto" 
-                                   id="archivoFoto" 
+                                   id="inputFoto" 
                                    class="form-control bg-dark text-white border-secondary" 
                                    accept="image/*">
                             <div class="form-text text-secondary small">
@@ -81,10 +83,14 @@
                             </div>
                         </div>
 
-                        <!-- Previsualización si ya existe foto -->
-                        <div class="col-12 text-center py-2" th:if="${usuarioForm.fotoUrl != null and !usuarioForm.fotoUrl.isEmpty()}">
-                            <span class="text-secondary small d-block mb-2">Foto actual registrada:</span>
-                            <img th:src="${usuarioForm.fotoUrl}" class="rounded-circle border border-warning object-fit-cover shadow" style="width: 80px; height: 80px;" alt="Foto Usuario">
+                        <!-- Previsualización Dinámica de la Foto -->
+                        <div class="col-12 text-center py-2" id="previewContainer" th:style="${usuarioForm.fotoUrl != null and !usuarioForm.fotoUrl.isEmpty() ? 'display:block;' : 'display:none;'}">
+                            <span class="text-secondary small d-block mb-2" id="previewTexto">
+                                <span th:text="${usuarioForm.fotoUrl != null and !usuarioForm.fotoUrl.isEmpty() ? 'Foto actual registrada:' : 'Previsualización de nueva foto:'}"></span>
+                            </span>
+                            <img id="previewImg" th:src="${usuarioForm.fotoUrl != null ? usuarioForm.fotoUrl : '#'}" 
+                                 class="rounded-circle border border-warning object-fit-cover shadow" 
+                                 style="width: 90px; height: 90px;" alt="Foto Usuario">
                         </div>
 
                         <!-- Botones de Acción -->
@@ -99,6 +105,68 @@
             </div>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA PREVIEW Y SWEETALERT2 -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Mostrar alertas si falla el guardado (ej. correo duplicado)
+            var mensajeError = /*[[${error}]]*/ null;
+            if (mensajeError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo guardar',
+                    text: mensajeError,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            // 2. Previsualizar la foto en vivo
+            const inputFoto = document.getElementById('inputFoto');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImg = document.getElementById('previewImg');
+            const previewTexto = document.getElementById('previewTexto');
+
+            if (inputFoto) {
+                inputFoto.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            previewTexto.innerHTML = 'Previsualización de nueva foto:';
+                            previewContainer.style.display = 'block';
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 3. Bloquear pantalla y mostrar "Guardando..." al enviar
+            const form = document.getElementById('formUsuario');
+            form.addEventListener('submit', function() {
+                Swal.fire({
+                    title: 'Guardando Usuario...',
+                    text: 'Procesando datos y subiendo imagen, por favor espera.',
+                    background: '#212529',
+                    color: '#ffffff',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
