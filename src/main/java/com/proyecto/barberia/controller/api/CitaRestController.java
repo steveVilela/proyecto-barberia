@@ -1,10 +1,10 @@
-
 package com.proyecto.barberia.controller.api;
 
 import com.proyecto.barberia.model.Barbero;
 import com.proyecto.barberia.model.Cita;
 import com.proyecto.barberia.model.Servicio;
 import com.proyecto.barberia.model.Usuario;
+import com.proyecto.barberia.repository.ICitaRepository;
 import com.proyecto.barberia.service.IBarberoService;
 import com.proyecto.barberia.service.ICitaService;
 import com.proyecto.barberia.service.IServicioService;
@@ -38,6 +38,10 @@ public class CitaRestController {
 
     @Autowired
     private IUsuarioService usuarioService;
+
+    // Repositorio para la validación de cruce de horarios
+    @Autowired
+    private ICitaRepository citaRepository;
 
     // 1. Listar citas de un usuario
     @GetMapping("/usuario/{idUsuario}")
@@ -93,6 +97,12 @@ public class CitaRestController {
                                     "Servicio no encontrado"));
 
             validarDisponibilidad(fecha, hora, barbero, servicio);
+
+            // ---> CANDADO PARA EVITAR CRUCE DE HORARIOS DESDE ANDROID <---
+            boolean ocupado = citaRepository.existeCitaActiva(barbero.getIdBarbero(), fecha, hora);
+            if (ocupado) {
+                return error(HttpStatus.CONFLICT, "Ese horario ya está ocupado por este barbero.");
+            }
 
             Cita cita = new Cita();
             cita.setUsuario(usuario);
@@ -179,6 +189,14 @@ public class CitaRestController {
             }
 
             validarDisponibilidad(fecha, hora, barbero, servicio);
+
+            // ---> CANDADO PARA EVITAR CRUCE AL REPROGRAMAR <---
+            if (!cita.getFecha().equals(fecha) || !cita.getHora().equals(hora) || !cita.getBarbero().getIdBarbero().equals(barbero.getIdBarbero())) {
+                boolean ocupado = citaRepository.existeCitaActiva(barbero.getIdBarbero(), fecha, hora);
+                if (ocupado) {
+                    return error(HttpStatus.CONFLICT, "Ese horario ya está ocupado por este barbero.");
+                }
+            }
 
             cita.setFecha(fecha);
             cita.setHora(hora);
