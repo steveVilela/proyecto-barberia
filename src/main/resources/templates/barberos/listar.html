@@ -15,12 +15,6 @@
         </a>
     </div>
 
-    <!-- Alertas de éxito o error -->
-    <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show py-2 small" role="alert">
-        <span th:text="${mensaje}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
     <!-- Tabla de Barberos -->
     <div class="table-dark-custom p-3">
         <div class="table-responsive">
@@ -59,9 +53,9 @@
                                class="btn btn-sm btn-outline-warning me-1" title="Editar">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
+                            <!-- Se cambió a la clase btn-eliminar -->
                             <a th:href="@{/barberos/eliminar/{id}(id=${barbero.idBarbero})}" 
-                               onclick="return confirm('¿Seguro que deseas eliminar a este barbero? Se borrará también su foto del storage.')" 
-                               class="btn btn-sm btn-outline-danger" title="Eliminar">
+                               class="btn btn-sm btn-outline-danger btn-eliminar" title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>
@@ -75,6 +69,59 @@
             </table>
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS PARA SWEETALERT2 -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Mostrar mensajes de éxito (ej. "Barbero guardado correctamente")
+            var mensaje = /*[[${mensaje}]]*/ null;
+            if (mensaje) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Operación Exitosa!',
+                    text: mensaje,
+                    background: '#212529',
+                    color: '#ffffff',
+                    confirmButtonColor: '#d4af37',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+
+            // 2. Lógica para el botón de Eliminar Barbero
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+            
+            botonesEliminar.forEach(boton => {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault(); // Detiene el salto directo
+                    const urlDestino = this.getAttribute('href'); // Guarda la URL de eliminación
+
+                    Swal.fire({
+                        title: '¿Eliminar Barbero?',
+                        text: '¿Seguro que deseas eliminar a este barbero? Se borrará también su foto del storage de forma permanente.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        background: '#212529',
+                        color: '#ffffff',
+                        confirmButtonColor: '#dc3545', // Botón rojo
+                        cancelButtonColor: '#6c757d',  // Botón gris
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        // Si hace clic en "Sí, eliminar"
+                        if (result.isConfirmed) {
+                            window.location.href = urlDestino;
+                        }
+                    });
+                });
+            });
+        });
+        /*]]>*/
+    </script>
 </div>
 
 </body>
